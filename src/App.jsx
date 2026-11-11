@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase.js'
+import { fetchRecords } from './lib/records.js'
+import RecordsCreate from './RecordsCreate.jsx'
+import RecordsList from './RecordsList.jsx'
 import './App.css'
 
 function translateAuthError(message) {
@@ -35,6 +38,26 @@ function App() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
+  const [screen, setScreen] = useState('list')
+  const [records, setRecords] = useState([])
+  const [recordsStatus, setRecordsStatus] = useState('loading')
+  const [recordsError, setRecordsError] = useState('')
+  const [confirmation, setConfirmation] = useState('')
+
+  const loadRecords = useCallback(async () => {
+    setRecordsStatus('loading')
+    setRecordsError('')
+
+    try {
+      const nextRecords = await fetchRecords()
+      setRecords(nextRecords)
+      setRecordsStatus(nextRecords.length === 0 ? 'empty' : 'success')
+    } catch {
+      setRecords([])
+      setRecordsStatus('error')
+      setRecordsError('Nepavyko įkelti įrašų. Bandykite dar kartą.')
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -53,6 +76,12 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
+      if (!nextSession) {
+        setScreen('list')
+        setRecords([])
+        setRecordsStatus('loading')
+        setConfirmation('')
+      }
     })
 
     return () => {
@@ -60,6 +89,36 @@ function App() {
       subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) {
+      return undefined
+    }
+
+    let cancelled = false
+
+    fetchRecords()
+      .then((nextRecords) => {
+        if (cancelled) {
+          return
+        }
+        setRecords(nextRecords)
+        setRecordsStatus(nextRecords.length === 0 ? 'empty' : 'success')
+      })
+      .catch(() => {
+        if (cancelled) {
+          return
+        }
+        setRecords([])
+        setRecordsStatus('error')
+        setRecordsError('Nepavyko įkelti įrašų. Bandykite dar kartą.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [session?.user?.id])
 
   async function handleAuth(mode) {
     setError('')
@@ -132,6 +191,12 @@ function App() {
     setPassword('')
   }
 
+  async function handleSaved(message) {
+    setConfirmation(message)
+    await loadRecords()
+    setScreen('list')
+  }
+
   if (initializing) {
     return (
       <main className="auth-page">
@@ -144,25 +209,48 @@ function App() {
 
   if (session) {
     return (
-      <main className="auth-page">
-        <section className="auth-card" aria-labelledby="app-title">
-          <h1 id="app-title">Transporto incidentų registravimas</h1>
-          <p className="lede">Esate prisijungę.</p>
-          <p className="user-email">{session.user.email}</p>
-          {error ? (
-            <p className="message error" role="alert">
-              {error}
-            </p>
-          ) : null}
+      <main className="app-page">
+        <header className="app-header">
+          <div>
+            <h1>Transporto incidentų registravimas</h1>
+            <p className="user-email">{session.user.email}</p>
+          </div>
           <button
             type="button"
-            className="primary"
+            className="secondary"
             onClick={handleSignOut}
             disabled={pending}
           >
             {pending ? 'Vykdoma...' : 'Atsijungti'}
           </button>
-        </section>
+        </header>
+
+        {error ? (
+          <p className="message error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {screen === 'create' ? (
+          <RecordsCreate
+            shipments={records}
+            confirmation={confirmation}
+            onBack={() => setScreen('list')}
+            onSaved={handleSaved}
+          />
+        ) : (
+          <RecordsList
+            records={records}
+            status={recordsStatus}
+            error={recordsError}
+            confirmation={confirmation}
+            onRetry={loadRecords}
+            onCreate={() => {
+              setConfirmation('')
+              setScreen('create')
+            }}
+          />
+        )}
       </main>
     )
   }
