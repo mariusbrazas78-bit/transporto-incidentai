@@ -1,16 +1,43 @@
-# React + Vite
+# Transporto incidentų registravimas
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Naudotojai gali registruotis, prisijungti, kurti pervežimus ir su jais susietus incidentus. Kiekvienas naudotojas mato tik savo įrašus.
 
-Currently, two official plugins are available:
+Vieša programa: [https://transporto-incidentai.vercel.app/](https://transporto-incidentai.vercel.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Technologijos
 
-## React Compiler
+- React
+- Vite
+- Supabase
+- Vercel
+- Zapier
+- Gmail
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Paleidimas vietoje
 
-## Expanding the Oxlint configuration
+```bash
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Sukurkite `.env.local` failą projekto šaknyje ir įrašykite aplinkos kintamuosius (žr. žemiau). Tada paleiskite kūrimo serverį:
+
+```bash
+npm run dev
+```
+
+Windows PowerShell galima naudoti `npm.cmd run dev`.
+
+## Aplinkos kintamieji
+
+Nukopijuokite šį pavyzdį į .env.local ir užpildykite reikšmes savo „Supabase“ projekto adresu bei viešuoju („Publishable“) raktu.
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+Tikrų raktų, webhook adresų ir asmeninių el. pašto adresų į šį failą nedėkite.
+
+## Pranešimai
+
+Naujas incidentas Supabase paleidžia Zapier automatizaciją. Skubiam incidentui Gmail išsiunčia laišką. Įprasto incidento kelią sustabdo filtras. Siuntimo klaidos atveju apie ją informuojamas automatizacijos prižiūrėtojas.
