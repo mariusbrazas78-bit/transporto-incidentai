@@ -35,6 +35,7 @@ function App() {
   const [initializing, setInitializing] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -281,17 +282,42 @@ function App() {
           />
 
           <label htmlFor="password">Slaptažodis</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={pending}
-            required
-            minLength={6}
-          />
+          <div className="password-field">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={pending}
+              required
+              minLength={6}
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              aria-label={showPassword ? 'Slėpti slaptažodį' : 'Rodyti slaptažodį'}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z" />
+                <circle cx="12" cy="12" r="3" />
+                {!showPassword && <path d="m3 3 18 18" />}
+              </svg>
+            </button>
+          </div>
 
           {error ? (
             <p className="message error" role="alert">

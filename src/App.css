@@ -123,10 +123,39 @@
   font: inherit;
 }
 
+.password-field {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.password-field input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
 .auth-form input:focus-visible,
 .record-form input:focus-visible,
 .record-form select:focus-visible,
 .record-form textarea:focus-visible,
+.password-toggle:focus-visible,
 .primary:focus-visible,
 .secondary:focus-visible {
   outline: 2px solid var(--accent);
